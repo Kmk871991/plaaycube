@@ -31,7 +31,7 @@
       <div>
         <label class="block text-sm mb-1">Choose Time Slot (45 mins)</label>
         <select name="time_slot" id="time_slot" required class="w-full p-2 rounded bg-gray-700 text-white">
-          <!-- Populated by JS -->
+          <!-- Populated by script.js -->
         </select>
       </div>
 
@@ -51,59 +51,7 @@
     📍 Playcube Gaming Hub · Chennai · Contact: +91-XXXXXXXXXX
   </footer>
 
-  <script>
-    // Set today's date as minimum
-    document.addEventListener("DOMContentLoaded", () => {
-      const dateInput = document.getElementById("play_date");
-      const today = new Date().toISOString().split("T")[0];
-      dateInput.min = today;
-
-      const slotSelector = document.getElementById("time_slot");
-
-      const generateTimeSlots = () => {
-        const slots = [];
-        let startHour = 10;
-        let endHour = 21;
-
-        for (let h = startHour; h < endHour; h++) {
-          if (h === 13) continue; // skip 1PM
-          const start = `${String(h).padStart(2, "0")}:00`;
-          const end = `${String(h).padStart(2, "0")}:45`;
-          slots.push(`${start} - ${end}`);
-        }
-
-        slotSelector.innerHTML = slots.map(slot => `<option value="${slot}">${slot}</option>`).join("");
-      };
-
-      generateTimeSlots();
-    });
-
-    // Handle form submission
-    document.getElementById('registrationForm').addEventListener('submit', function (e) {
-      e.preventDefault();
-
-      const form = e.target;
-      const data = {
-        team: form.team_name.value,
-        p1: form.player1_name.value,
-        p1email: form.player1_email.value,
-        p2: form.player2_name.value,
-        p2email: form.player2_email.value,
-        date: form.play_date.value,
-        time: form.time_slot.value
-      };
-
-      if (Object.values(data).some(val => !val)) {
-        alert('Please fill all fields!');
-        return;
-      }
-
-      // TODO: Send data to Google Sheets, backend, etc. before payment if needed
-
-      // Redirect to payment (replace with your Razorpay link)
-      const paymentURL = "https://rzp.io/l/your-razorpay-link";  // <--- Replace with real link
-      window.location.href = paymentURL;
-    });
-  </script>
+  <!-- Link to external JS -->
+  <script src="script.js"></script>
 </body>
 </html>
