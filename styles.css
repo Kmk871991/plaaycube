@@ -1,0 +1,4 @@
+/* Optional custom tweaks beyond Tailwind */
+input::placeholder {
+  color: #bbb;
+}
