@@ -3,45 +3,45 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Playcube 2v2 FIFA Challenge</title>
+  <title>Playcube 2v2 FIFA Booking</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    option.booked {
+      background-color: #f87171; /* red */
+      color: white;
+    }
+    option.waitlist {
+      background-color: #facc15; /* yellow */
+      color: black;
+    }
+  </style>
 </head>
 <body class="bg-gray-900 text-white font-sans">
 
   <div class="max-w-xl mx-auto p-6 mt-10 bg-gray-800 rounded-2xl shadow-xl">
     <h1 class="text-3xl font-bold mb-4 text-center">⚽ Playcube 2v2 FIFA Challenge</h1>
     <p class="text-center text-lg mb-6">
-      ₹100 per player · Best of 5 Matches · 45 mins of high-intensity FIFA action
+      ₹100 per player · Best of 5 Matches · 45 mins
     </p>
 
-    <form id="registrationForm" class="space-y-4">
+    <form id="bookingForm" class="space-y-4">
       <input type="text" name="team_name" placeholder="Team Name" required class="w-full p-2 rounded bg-gray-700 text-white"/>
-      <input type="text" name="player1_name" placeholder="Player 1 Name" required class="w-full p-2 rounded bg-gray-700 text-white"/>
+      <input type="text" name="player1" placeholder="Player 1 Name" required class="w-full p-2 rounded bg-gray-700 text-white"/>
       <input type="email" name="player1_email" placeholder="Player 1 Email" required class="w-full p-2 rounded bg-gray-700 text-white"/>
-      <input type="text" name="player2_name" placeholder="Player 2 Name" required class="w-full p-2 rounded bg-gray-700 text-white"/>
+      <input type="text" name="player2" placeholder="Player 2 Name" required class="w-full p-2 rounded bg-gray-700 text-white"/>
       <input type="email" name="player2_email" placeholder="Player 2 Email" required class="w-full p-2 rounded bg-gray-700 text-white"/>
 
-      <!-- Date Picker -->
-      <div>
-        <label class="block text-sm mb-1">Select Date</label>
-        <input type="date" name="play_date" id="play_date" required class="w-full p-2 rounded bg-gray-700 text-white"/>
-      </div>
+      <label class="block text-sm">Select Date</label>
+      <input type="date" name="date" id="datePicker" required class="w-full p-2 rounded bg-gray-700 text-white"/>
 
-      <!-- Time Slot Selector -->
-      <div>
-        <label class="block text-sm mb-1">Choose Time Slot (45 mins)</label>
-        <select name="time_slot" id="time_slot" required class="w-full p-2 rounded bg-gray-700 text-white">
-          <!-- Populated by script.js -->
-        </select>
-      </div>
+      <label class="block text-sm">Select Time Slot</label>
+      <select name="slot" id="timeSlot" required class="w-full p-2 rounded bg-gray-700 text-white"></select>
 
-      <p class="text-sm text-gray-300 mt-4">
-        💡 After submitting, you'll be redirected to complete payment and confirm your slot.
-      </p>
+      <div id="slotMessage" class="text-sm text-yellow-400"></div>
 
       <div class="flex justify-center">
         <button type="submit" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded-xl text-lg mt-4">
-          Pay ₹200 & Book
+          Continue to Pay
         </button>
       </div>
     </form>
@@ -51,7 +51,70 @@
     📍 Playcube Gaming Hub · Chennai · Contact: +91-XXXXXXXXXX
   </footer>
 
-  <!-- Link to external JS -->
-  <script src="script.js"></script>
+  <script>
+    const bookedSlots = {
+      "2025-07-18": ["10:00 - 10:45", "11:00 - 11:45"],
+      "2025-07-19": ["15:00 - 15:45"]
+    };
+
+    const waitlistCapacity = 2;
+    const datePicker = document.getElementById("datePicker");
+    const timeSlot = document.getElementById("timeSlot");
+    const slotMessage = document.getElementById("slotMessage");
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const today = new Date().toISOString().split("T")[0];
+      datePicker.min = today;
+    });
+
+    datePicker.addEventListener("change", () => {
+      populateTimeSlots(datePicker.value);
+    });
+
+    function populateTimeSlots(selectedDate) {
+      timeSlot.innerHTML = "";
+      slotMessage.innerText = "";
+
+      const booked = bookedSlots[selectedDate] || [];
+      for (let h = 10; h < 21; h++) {
+        if (h === 13) continue;
+        const slot = `${String(h).padStart(2, "0")}:00 - ${String(h).padStart(2, "0")}:45`;
+        const isBooked = booked.includes(slot);
+
+        const option = document.createElement("option");
+        option.value = slot;
+        option.textContent = slot + (isBooked ? " (Booked)" : "");
+        option.className = isBooked ? "booked" : "available";
+        option.dataset.status = isBooked ? "booked" : "available";
+
+        timeSlot.appendChild(option);
+      }
+    }
+
+    timeSlot.addEventListener("change", () => {
+      const selectedOption = timeSlot.options[timeSlot.selectedIndex];
+      const status = selectedOption.dataset.status;
+      if (status === "booked") {
+        slotMessage.innerText = "⚠ This slot is already booked. You will be added to the waitlist. You may also try another time.";
+      } else {
+        slotMessage.innerText = "";
+      }
+    });
+
+    document.getElementById("bookingForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const slotStatus = timeSlot.options[timeSlot.selectedIndex].dataset.status;
+      if (slotStatus === "booked") {
+        alert("You are being waitlisted for this slot. If it opens, we will notify you 3 days in advance.");
+      } else {
+        alert("Booking confirmed! Redirecting to payment...");
+      }
+
+      // TODO: Send to Google Sheets / backend
+      // Replace below with Razorpay payment URL
+      window.location.href = "https://rzp.io/l/your-razorpay-link";
+    });
+  </script>
+
 </body>
 </html>
