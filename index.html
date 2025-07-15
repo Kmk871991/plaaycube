@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Playcube 2v2 FIFA Challenge</title>
-  <link rel="stylesheet" href="style.css">
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-900 text-white font-sans">
@@ -21,10 +20,23 @@
       <input type="email" name="player1_email" placeholder="Player 1 Email" required class="w-full p-2 rounded bg-gray-700 text-white"/>
       <input type="text" name="player2_name" placeholder="Player 2 Name" required class="w-full p-2 rounded bg-gray-700 text-white"/>
       <input type="email" name="player2_email" placeholder="Player 2 Email" required class="w-full p-2 rounded bg-gray-700 text-white"/>
-      <input type="text" name="slot" placeholder="Preferred Date/Time (e.g. Sat 7PM)" required class="w-full p-2 rounded bg-gray-700 text-white"/>
+
+      <!-- Date Picker -->
+      <div>
+        <label class="block text-sm mb-1">Select Date</label>
+        <input type="date" name="play_date" id="play_date" required class="w-full p-2 rounded bg-gray-700 text-white"/>
+      </div>
+
+      <!-- Time Slot Selector -->
+      <div>
+        <label class="block text-sm mb-1">Choose Time Slot (45 mins)</label>
+        <select name="time_slot" id="time_slot" required class="w-full p-2 rounded bg-gray-700 text-white">
+          <!-- Populated by JS -->
+        </select>
+      </div>
 
       <p class="text-sm text-gray-300 mt-4">
-        💡 After submitting, you’ll be redirected to payment to confirm your slot.
+        💡 After submitting, you'll be redirected to complete payment and confirm your slot.
       </p>
 
       <div class="flex justify-center">
@@ -39,6 +51,59 @@
     📍 Playcube Gaming Hub · Chennai · Contact: +91-XXXXXXXXXX
   </footer>
 
-  <script src="script.js"></script>
+  <script>
+    // Set today's date as minimum
+    document.addEventListener("DOMContentLoaded", () => {
+      const dateInput = document.getElementById("play_date");
+      const today = new Date().toISOString().split("T")[0];
+      dateInput.min = today;
+
+      const slotSelector = document.getElementById("time_slot");
+
+      const generateTimeSlots = () => {
+        const slots = [];
+        let startHour = 10;
+        let endHour = 21;
+
+        for (let h = startHour; h < endHour; h++) {
+          if (h === 13) continue; // skip 1PM
+          const start = `${String(h).padStart(2, "0")}:00`;
+          const end = `${String(h).padStart(2, "0")}:45`;
+          slots.push(`${start} - ${end}`);
+        }
+
+        slotSelector.innerHTML = slots.map(slot => `<option value="${slot}">${slot}</option>`).join("");
+      };
+
+      generateTimeSlots();
+    });
+
+    // Handle form submission
+    document.getElementById('registrationForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const form = e.target;
+      const data = {
+        team: form.team_name.value,
+        p1: form.player1_name.value,
+        p1email: form.player1_email.value,
+        p2: form.player2_name.value,
+        p2email: form.player2_email.value,
+        date: form.play_date.value,
+        time: form.time_slot.value
+      };
+
+      if (Object.values(data).some(val => !val)) {
+        alert('Please fill all fields!');
+        return;
+      }
+
+      // TODO: Send data to Google Sheets, backend, etc. before payment if needed
+
+      // Redirect to payment (replace with your Razorpay link)
+      const paymentURL = "https://rzp.io/l/your-razorpay-link";  // <--- Replace with real link
+      window.location.href = paymentURL;
+    });
+  </script>
 </body>
 </html>
